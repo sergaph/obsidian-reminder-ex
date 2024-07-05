@@ -1,7 +1,7 @@
 <script lang="typescript">
   import type { Component } from "obsidian";
   import type { Reminder } from "../../model/reminder";
-  import type { DateTime, Later } from "../../model/time";
+  import { DateTime, inHours, Later, tomorrow } from "../../model/time";
   import Icon from "./Icon.svelte";
   import Markdown from "./Markdown.svelte";
 
@@ -23,9 +23,44 @@
     }
     onRemindMeLater(selected.later());
   }
+
+  const handlePressKey = (e: KeyboardEvent) => {
+    switch (e.key.toLowerCase()) {
+      case "d":
+        onDone();
+        removePressKeyListener();
+        break;
+      case "m":
+        onMute();
+        removePressKeyListener();
+        break;
+      case "t":
+        onRemindMeLater(tomorrow()());
+        removePressKeyListener();
+        break;
+      case "1":
+        onRemindMeLater(inHours(1)());
+        removePressKeyListener();
+        break;
+      case "3":
+        onRemindMeLater(inHours(3)());
+        removePressKeyListener();
+        break;
+      default:
+        break;
+    }
+  };
+
+  function removePressKeyListener() {
+    window.removeEventListener("keypress", handlePressKey);
+  }
+
+  window.addEventListener("keypress", handlePressKey);
+
+  console.log("OK");
 </script>
 
-<main>
+<main id="reminder-modal">
   <h1>
     <Markdown
       markdown={reminder.title}
@@ -57,6 +92,13 @@
       {/each}
     </select>
   </div>
+  <div class="reminder-hotkeys-info">
+    <span>t — tomorrow,</span>
+    <span>1 - 1 hour,</span>
+    <span>3 - 3 hour,</span>
+    <span>d - done,</span>
+    <span>m - mute</span>
+  </div>
 </main>
 
 <style>
@@ -83,5 +125,13 @@
 
   .later-select {
     font-size: 14px;
+  }
+
+  .reminder-hotkeys-info {
+    color: var(--text-faint);
+    font-size: xx-small;
+    margin-top: 1rem;
+    display: flex;
+    gap: 0.5rem;
   }
 </style>
